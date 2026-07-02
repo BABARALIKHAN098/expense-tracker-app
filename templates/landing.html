@@ -20,7 +20,7 @@
         </p>
         <div class="hero-actions-v2">
             <a href="{{ url_for('register') }}" class="hero-btn-primary">Create free account</a>
-            <a href="{{ url_for('login') }}" class="hero-btn-ghost">See how it works</a>
+            <a href="#" class="hero-btn-ghost" id="howItWorksBtn">See how it works</a>
         </div>
     </div>
     <div class="hero-mock">
@@ -99,4 +99,65 @@
     </div>
 </section>
 
+<!-- How it works modal -->
+<div class="video-modal" id="videoModal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="See how Spendly works">
+    <div class="video-modal-backdrop" data-close-modal></div>
+    <div class="video-modal-dialog">
+        <button type="button" class="video-modal-close" data-close-modal aria-label="Close video">&times;</button>
+        <div class="video-modal-frame">
+            <iframe id="videoModalIframe"
+                    src=""
+                    title="How Spendly works"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function () {
+        var VIDEO_URL = 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0';
+        var btn = document.getElementById('howItWorksBtn');
+        var modal = document.getElementById('videoModal');
+        var iframe = document.getElementById('videoModalIframe');
+
+        if (!btn || !modal || !iframe) return;
+
+        function openModal() {
+            iframe.src = VIDEO_URL;
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            // Clear the src to fully stop the video (audio + playback)
+            iframe.src = '';
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            openModal();
+        });
+
+        modal.addEventListener('click', function (e) {
+            if (e.target && e.target.hasAttribute('data-close-modal')) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+                closeModal();
+            }
+        });
+    })();
+</script>
 {% endblock %}
