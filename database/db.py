@@ -104,3 +104,33 @@ def seed_db():
         conn.commit()
     finally:
         conn.close()
+
+
+def find_user_by_email(email: str):
+    """Return the users row matching `email` (case-insensitive), or None."""
+    conn = get_db()
+    try:
+        return conn.execute(
+            "SELECT * FROM users WHERE LOWER(email) = LOWER(?)",
+            (email,),
+        ).fetchone()
+    finally:
+        conn.close()
+
+
+def create_user(name: str, email: str, password_hash: str) -> int:
+    """Insert a new user and return the new row's id. Caller passes an already-hashed password.
+
+    Raises sqlite3.IntegrityError on UNIQUE constraint violations (duplicate email);
+    the route catches that and maps it to a user-facing error.
+    """
+    conn = get_db()
+    try:
+        cur = conn.execute(
+            "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
+            (name, email, password_hash),
+        )
+        conn.commit()
+        return cur.lastrowid
+    finally:
+        conn.close()
