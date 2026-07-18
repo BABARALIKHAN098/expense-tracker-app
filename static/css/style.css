@@ -28,6 +28,24 @@
     --radius-sm: 6px;
     --radius-md: 12px;
     --radius-lg: 20px;
+
+    /* Category palette — used by the profile transactions table and the
+       category breakdown bars. Hue per category, used as background for
+       badges and bars, with a matching soft variant for the badge text. */
+    --cat-food:           #6a8f4e;
+    --cat-food-soft:      #e8f0e1;
+    --cat-transport:      #b58a2c;
+    --cat-transport-soft: #f7ecd5;
+    --cat-bills:          #7a4a8c;
+    --cat-bills-soft:     #ece2f2;
+    --cat-health:         #b04a4a;
+    --cat-health-soft:    #f7e1e1;
+    --cat-entertainment:  #2a6f8a;
+    --cat-entertainment-soft: #d8ebf3;
+    --cat-shopping:       #8c5a2a;
+    --cat-shopping-soft:  #f3e5d2;
+    --cat-other:          #5a5a5a;
+    --cat-other-soft:     #e8e8e8;
 }
 
 /* ------------------------------------------------------------------ */
