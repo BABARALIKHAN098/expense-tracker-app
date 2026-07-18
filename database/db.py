@@ -118,6 +118,106 @@ def find_user_by_email(email: str):
         conn.close()
 
 
+def get_user_by_id(user_id: int):
+    """Return the users row matching `user_id`, or None."""
+    conn = get_db()
+    try:
+        return conn.execute(
+            "SELECT * FROM users WHERE id = ?", (user_id,)
+        ).fetchone()
+    finally:
+        conn.close()
+
+
+def count_expenses_for_user(user_id: int) -> int:
+    """Return the number of expenses owned by `user_id`."""
+    conn = get_db()
+    try:
+        return conn.execute(
+            "SELECT COUNT(*) FROM expenses WHERE user_id = ?", (user_id,)
+        ).fetchone()[0]
+    finally:
+        conn.close()
+
+
+def get_total_spent_for_user(user_id: int) -> float:
+    """Return the sum of all expense amounts for `user_id` (0.0 if none)."""
+    conn = get_db()
+    try:
+        row = conn.execute(
+            "SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ?",
+            (user_id,),
+        ).fetchone()
+        return float(row[0])
+    finally:
+        conn.close()
+
+
+def get_top_category_for_user(user_id: int):
+    """Return the category name with the highest total spend, or None if no expenses.
+
+    Tie-breaking is alphabetical so the result is deterministic.
+    """
+    conn = get_db()
+    try:
+        row = conn.execute(
+            """
+            SELECT category, SUM(amount) AS total
+            FROM expenses
+            WHERE user_id = ?
+            GROUP BY category
+            ORDER BY total DESC, category ASC
+            LIMIT 1
+            """,
+            (user_id,),
+        ).fetchone()
+        return row["category"] if row is not None else None
+    finally:
+        conn.close()
+
+
+def get_recent_expenses_for_user(user_id: int, limit: int = 10):
+    """Return up to `limit` expenses for `user_id`, newest first.
+
+    Each row is a sqlite3.Row with id, amount, category, date, description.
+    """
+    conn = get_db()
+    try:
+        return conn.execute(
+            """
+            SELECT id, amount, category, date, description
+            FROM expenses
+            WHERE user_id = ?
+            ORDER BY date DESC, id DESC
+            LIMIT ?
+            """,
+            (user_id, limit),
+        ).fetchall()
+    finally:
+        conn.close()
+
+
+def get_category_breakdown_for_user(user_id: int):
+    """Return a list of (category, total) rows for `user_id`, biggest first.
+
+    Each entry is a sqlite3.Row with 'category' and 'total' (REAL).
+    """
+    conn = get_db()
+    try:
+        return conn.execute(
+            """
+            SELECT category, SUM(amount) AS total
+            FROM expenses
+            WHERE user_id = ?
+            GROUP BY category
+            ORDER BY total DESC, category ASC
+            """,
+            (user_id,),
+        ).fetchall()
+    finally:
+        conn.close()
+
+
 def create_user(name: str, email: str, password_hash: str) -> int:
     """Insert a new user and return the new row's id. Caller passes an already-hashed password.
 

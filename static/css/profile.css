@@ -1,0 +1,334 @@
+/* ------------------------------------------------------------------ */
+/* Profile page                                                        */
+/* ------------------------------------------------------------------ */
+/* All colors come from existing CSS variables defined in style.css.   */
+/* No raw hex values.                                                  */
+/* ------------------------------------------------------------------ */
+
+.profile-section {
+    padding: 3rem 2rem 4rem;
+    min-height: calc(100vh - 60px - 100px);
+}
+
+.profile-container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+}
+
+/* ------------------------------------------------------------------ */
+/* User info card                                                      */
+/* ------------------------------------------------------------------ */
+
+.profile-card {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.profile-user-card {
+    margin-bottom: 1.5rem;
+}
+
+.profile-avatar {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-user-name {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--ink);
+    line-height: 1.2;
+}
+
+.profile-user-email {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+}
+
+.profile-user-since {
+    color: var(--ink-muted);
+    font-size: 0.85rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Stats row                                                           */
+/* ------------------------------------------------------------------ */
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-stat {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.profile-stat-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.profile-stat-value {
+    font-family: var(--font-display);
+    font-size: 1.85rem;
+    color: var(--ink);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.profile-stat-money {
+    color: var(--accent);
+}
+
+.profile-stat-category {
+    color: var(--ink);
+}
+
+/* ------------------------------------------------------------------ */
+/* Two-column grid: transactions + breakdown                           */
+/* ------------------------------------------------------------------ */
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 1.5rem;
+}
+
+.profile-panel {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+}
+
+.profile-panel-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--ink);
+    margin-bottom: 1rem;
+}
+
+.profile-empty {
+    color: var(--ink-muted);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 1rem 0;
+    margin: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Transactions table                                                  */
+/* ------------------------------------------------------------------ */
+
+.profile-table-wrap {
+    overflow-x: auto;
+    margin: 0 -0.25rem;
+}
+
+.profile-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.profile-table thead th {
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.profile-table tbody tr {
+    border-bottom: 1px solid var(--border-soft);
+    transition: background-color 0.15s;
+}
+
+.profile-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.profile-table tbody tr:hover {
+    background: var(--paper);
+}
+
+.profile-table td {
+    padding: 0.75rem;
+    color: var(--ink);
+    vertical-align: middle;
+}
+
+.profile-tx-date {
+    color: var(--ink-muted);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.profile-tx-desc {
+    color: var(--ink-soft);
+}
+
+.profile-tx-amount {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.profile-table thead .profile-tx-amount {
+    text-align: right;
+}
+
+/* ------------------------------------------------------------------ */
+/* Category badges                                                     */
+/* ------------------------------------------------------------------ */
+
+.profile-badge {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.profile-badge--food           { background: var(--cat-food-soft);           color: var(--cat-food); }
+.profile-badge--transport      { background: var(--cat-transport-soft);      color: var(--cat-transport); }
+.profile-badge--bills          { background: var(--cat-bills-soft);          color: var(--cat-bills); }
+.profile-badge--health         { background: var(--cat-health-soft);         color: var(--cat-health); }
+.profile-badge--entertainment  { background: var(--cat-entertainment-soft);  color: var(--cat-entertainment); }
+.profile-badge--shopping       { background: var(--cat-shopping-soft);       color: var(--cat-shopping); }
+.profile-badge--other          { background: var(--cat-other-soft);          color: var(--cat-other); }
+
+/* ------------------------------------------------------------------ */
+/* Category breakdown bars                                             */
+/* ------------------------------------------------------------------ */
+
+.profile-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.profile-bar-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 80px;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.profile-bar-cat {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-bar-track {
+    height: 6px;
+    background: var(--border-soft);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.profile-bar {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--accent);
+    transition: width 0.4s ease;
+}
+
+.profile-bar--food           { background: var(--cat-food); }
+.profile-bar--transport      { background: var(--cat-transport); }
+.profile-bar--bills          { background: var(--cat-bills); }
+.profile-bar--health         { background: var(--cat-health); }
+.profile-bar--entertainment  { background: var(--cat-entertainment); }
+.profile-bar--shopping       { background: var(--cat-shopping); }
+.profile-bar--other          { background: var(--cat-other); }
+
+.profile-bar-amt {
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ */
+/* Navbar user greeting                                                */
+/* ------------------------------------------------------------------ */
+
+.nav-user {
+    color: var(--ink);
+    font-weight: 500;
+}
+
+/* ------------------------------------------------------------------ */
+/* Mobile                                                              */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 900px) {
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .profile-section {
+        padding: 2rem 1rem 3rem;
+    }
+
+    .profile-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profile-meta {
+        align-items: center;
+    }
+}
