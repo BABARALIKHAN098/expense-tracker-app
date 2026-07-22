@@ -74,6 +74,112 @@
 }
 
 /* ------------------------------------------------------------------ */
+/* Filter form                                                         */
+/* ------------------------------------------------------------------ */
+
+.profile-filter {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+.profile-filter-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    flex: 1 1 auto;
+}
+
+.profile-filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 160px;
+    flex: 0 1 auto;
+}
+
+.profile-filter-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.profile-filter-input {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.65rem;
+    transition: border-color 0.15s ease;
+}
+
+.profile-filter-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.profile-filter-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.profile-filter-apply {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--paper);
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 0.55rem 1.1rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.profile-filter-apply:hover {
+    background: var(--accent-hover, var(--accent));
+}
+
+.profile-filter-clear {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--ink-muted);
+    text-decoration: none;
+    padding: 0.55rem 0.5rem;
+    border-radius: var(--radius-sm);
+    transition: color 0.15s ease;
+}
+
+.profile-filter-clear:hover {
+    color: var(--ink);
+    text-decoration: underline;
+}
+
+.profile-filter-summary {
+    margin: -0.5rem 0 1.25rem;
+    font-size: 0.9rem;
+    color: var(--ink-muted);
+}
+
+.profile-filter-summary strong {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ */
 /* Stats row                                                           */
 /* ------------------------------------------------------------------ */
 

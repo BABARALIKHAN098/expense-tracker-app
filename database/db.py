@@ -129,90 +129,177 @@ def get_user_by_id(user_id: int):
         conn.close()
 
 
-def count_expenses_for_user(user_id: int) -> int:
-    """Return the number of expenses owned by `user_id`."""
+# The seven categories a user can pick from in the /profile filter.
+# Kept here (not in app.py) so the DB layer and the route layer agree on
+# what counts as a valid category.
+ALLOWED_CATEGORIES = (
+    "Food",
+    "Transport",
+    "Bills",
+    "Health",
+    "Entertainment",
+    "Shopping",
+    "Other",
+)
+
+
+def _apply_expense_filters(start_date=None, end_date=None, category=None):
+    """Build a (extra_clauses, params) pair for the five expense query helpers.
+
+    Returns JUST the extra AND-clauses (without the WHERE keyword) and the
+    params to bind to them. Callers are expected to write:
+
+        WHERE user_id = ? <extra_clauses>
+
+    so we never get duplicate WHERE keywords when filters are absent or
+    present.
+
+    Any filter that is None or otherwise invalid is simply skipped, so
+    callers can pass the raw values straight from request.args and trust
+    the helper to ignore the bad ones.
+    """
+    clauses = []
+    params = []
+
+    if start_date:
+        clauses.append("date >= ?")
+        params.append(start_date)
+    if end_date:
+        clauses.append("date <= ?")
+        params.append(end_date)
+    if category:
+        clauses.append("category = ?")
+        params.append(category)
+
+    extra = (" AND " + " AND ".join(clauses)) if clauses else ""
+    return extra, params
+
+
+def count_expenses_for_user(
+    user_id: int,
+    start_date=None,
+    end_date=None,
+    category=None,
+) -> int:
+    """Return the number of expenses owned by `user_id`, optionally filtered."""
+    extra, params = _apply_expense_filters(start_date, end_date, category)
     conn = get_db()
     try:
         return conn.execute(
-            "SELECT COUNT(*) FROM expenses WHERE user_id = ?", (user_id,)
+            f"SELECT COUNT(*) FROM expenses WHERE user_id = ?{extra}",
+            (user_id, *params),
         ).fetchone()[0]
     finally:
         conn.close()
 
 
-def get_total_spent_for_user(user_id: int) -> float:
-    """Return the sum of all expense amounts for `user_id` (0.0 if none)."""
+def get_total_spent_for_user(
+    user_id: int,
+    start_date=None,
+    end_date=None,
+    category=None,
+) -> float:
+    """Return the sum of all expense amounts for `user_id` (0.0 if none), optionally filtered."""
+    extra, params = _apply_expense_filters(start_date, end_date, category)
     conn = get_db()
     try:
         row = conn.execute(
-            "SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ?",
-            (user_id,),
+            f"SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ?{extra}",
+            (user_id, *params),
         ).fetchone()
         return float(row[0])
     finally:
         conn.close()
 
 
-def get_top_category_for_user(user_id: int):
+def get_top_category_for_user(
+    user_id: int,
+    start_date=None,
+    end_date=None,
+    category=None,
+):
     """Return the category name with the highest total spend, or None if no expenses.
 
     Tie-breaking is alphabetical so the result is deterministic.
+
+    The `category` filter is intentionally ignored for this helper — asking
+    "what's my top category within a single category?" is meaningless, so
+    we report the top category from the broader date-windowed set instead.
     """
+    # Drop the category filter; keep the date range.
+    extra, params = _apply_expense_filters(start_date=start_date, end_date=end_date)
     conn = get_db()
     try:
         row = conn.execute(
-            """
+            f"""
             SELECT category, SUM(amount) AS total
             FROM expenses
-            WHERE user_id = ?
+            WHERE user_id = ?{extra}
             GROUP BY category
             ORDER BY total DESC, category ASC
             LIMIT 1
             """,
-            (user_id,),
+            (user_id, *params),
         ).fetchone()
         return row["category"] if row is not None else None
     finally:
         conn.close()
 
 
-def get_recent_expenses_for_user(user_id: int, limit: int = 10):
-    """Return up to `limit` expenses for `user_id`, newest first.
+def get_recent_expenses_for_user(
+    user_id: int,
+    limit: int = 10,
+    start_date=None,
+    end_date=None,
+    category=None,
+):
+    """Return up to `limit` expenses for `user_id`, newest first, optionally filtered.
 
     Each row is a sqlite3.Row with id, amount, category, date, description.
     """
+    extra, params = _apply_expense_filters(start_date, end_date, category)
     conn = get_db()
     try:
         return conn.execute(
-            """
+            f"""
             SELECT id, amount, category, date, description
             FROM expenses
-            WHERE user_id = ?
+            WHERE user_id = ?{extra}
             ORDER BY date DESC, id DESC
             LIMIT ?
             """,
-            (user_id, limit),
+            (user_id, *params, limit),
         ).fetchall()
     finally:
         conn.close()
 
 
-def get_category_breakdown_for_user(user_id: int):
-    """Return a list of (category, total) rows for `user_id`, biggest first.
+def get_category_breakdown_for_user(
+    user_id: int,
+    start_date=None,
+    end_date=None,
+    category=None,
+):
+    """Return a list of (category, total) rows for `user_id`, biggest first, optionally filtered.
+
+    The `category` filter is dropped here for the same reason as
+    `get_top_category_for_user` — filtering to one category would leave
+    at most one row, defeating the breakdown's purpose.
 
     Each entry is a sqlite3.Row with 'category' and 'total' (REAL).
     """
+    extra, params = _apply_expense_filters(start_date=start_date, end_date=end_date)
     conn = get_db()
     try:
         return conn.execute(
-            """
+            f"""
             SELECT category, SUM(amount) AS total
             FROM expenses
-            WHERE user_id = ?
+            WHERE user_id = ?{extra}
             GROUP BY category
             ORDER BY total DESC, category ASC
             """,
-            (user_id,),
+            (user_id, *params),
         ).fetchall()
     finally:
         conn.close()

@@ -1,5 +1,7 @@
 import os
+import re
 import sqlite3
+from datetime import date
 
 from flask import Flask, render_template, request, redirect, url_for, session
 
@@ -15,8 +17,42 @@ from database.db import (
     get_top_category_for_user,
     get_recent_expenses_for_user,
     get_category_breakdown_for_user,
+    ALLOWED_CATEGORIES,
 )
 from database.auth import hash_password, verify_password
+
+# YYYY-MM-DD — strict, so junk like "not-a-date" or "2025-1-1" is rejected
+# before it reaches the DB layer.
+_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def _valid_date(value):
+    """Return the date string if it parses as a real YYYY-MM-DD calendar date, else None."""
+    if not value or not _DATE_RE.match(value):
+        return None
+    try:
+        # Round-tripping through date(...) catches "2025-02-31" — valid format,
+        # not a valid date.
+        date.fromisoformat(value)
+    except ValueError:
+        return None
+    return value
+
+
+def _parse_profile_filters():
+    """Read and validate the /profile query-string filters.
+
+    Bad inputs are silently dropped (per spec) so the page still renders
+    instead of 500-ing on a junk URL.
+    """
+    start_date = _valid_date((request.args.get("start_date") or "").strip())
+    end_date = _valid_date((request.args.get("end_date") or "").strip())
+
+    category = (request.args.get("category") or "").strip()
+    if category not in ALLOWED_CATEGORIES:
+        category = None
+
+    return start_date, end_date, category
 
 app = Flask(__name__)
 # Override the SECRET_KEY env var in production. The dev fallback is intentionally
@@ -151,6 +187,28 @@ def profile():
     recent_expenses = get_recent_expenses_for_user(user_id, limit=10)
     category_breakdown = get_category_breakdown_for_user(user_id)
 
+    # Re-read the just-inserted filter vars and apply them to the DB helpers.
+    # Done as a second pass so the same filter values drive every helper and
+    # the "filtered" indicator in the template can echo the values back.
+    start_date, end_date, category = _parse_profile_filters()
+    filters_active = bool(start_date or end_date or category)
+
+    expense_count = count_expenses_for_user(
+        user_id, start_date=start_date, end_date=end_date, category=category
+    )
+    total_spent = get_total_spent_for_user(
+        user_id, start_date=start_date, end_date=end_date, category=category
+    )
+    top_category = get_top_category_for_user(
+        user_id, start_date=start_date, end_date=end_date, category=category
+    )
+    recent_expenses = get_recent_expenses_for_user(
+        user_id, limit=10, start_date=start_date, end_date=end_date, category=category
+    )
+    category_breakdown = get_category_breakdown_for_user(
+        user_id, start_date=start_date, end_date=end_date, category=category
+    )
+
     # Format each row's date as "12 Apr 2025" and amount as ₹1,234.56.
     display_rows = []
     for row in recent_expenses:
@@ -187,6 +245,13 @@ def profile():
         top_category=top_category or "—",
         recent_expenses=display_rows,
         category_breakdown=display_breakdown,
+        # Filter UI context — echoed into the form so values persist after submit.
+        allowed_categories=ALLOWED_CATEGORIES,
+        filter_start_date=start_date or "",
+        filter_end_date=end_date or "",
+        filter_category=category or "",
+        filters_active=filters_active,
+        result_count=expense_count,
     )
 
 

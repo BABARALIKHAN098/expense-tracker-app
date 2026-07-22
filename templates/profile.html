@@ -22,6 +22,55 @@
             </dl>
         </div>
 
+        {# ---------------- Filter form ---------------- #}
+        <form class="profile-filter" method="get" action="{{ url_for('profile') }}">
+            <div class="profile-filter-fields">
+                <label class="profile-filter-field">
+                    <span class="profile-filter-label">From</span>
+                    <input
+                        type="date"
+                        name="start_date"
+                        value="{{ filter_start_date }}"
+                        class="profile-filter-input"
+                    >
+                </label>
+                <label class="profile-filter-field">
+                    <span class="profile-filter-label">To</span>
+                    <input
+                        type="date"
+                        name="end_date"
+                        value="{{ filter_end_date }}"
+                        class="profile-filter-input"
+                    >
+                </label>
+                <label class="profile-filter-field">
+                    <span class="profile-filter-label">Category</span>
+                    <select name="category" class="profile-filter-input">
+                        <option value="" {% if not filter_category %}selected{% endif %}>All categories</option>
+                        {% for cat in allowed_categories %}
+                        <option value="{{ cat }}" {% if filter_category == cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+            <div class="profile-filter-actions">
+                <button type="submit" class="profile-filter-apply">Apply</button>
+                {% if filters_active %}
+                <a href="{{ url_for('profile') }}" class="profile-filter-clear">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+
+        {% if filters_active %}
+        <p class="profile-filter-summary">
+            Showing <strong>{{ result_count }}</strong>
+            {% if result_count == 1 %}expense{% else %}expenses{% endif %}
+            {% if filter_start_date %}from <strong>{{ filter_start_date }}</strong>{% endif %}
+            {% if filter_end_date %}{% if filter_start_date %} to{% else %}through{% endif %} <strong>{{ filter_end_date }}</strong>{% endif %}
+            {% if filter_category %}in <strong>{{ filter_category }}</strong>{% endif %}.
+        </p>
+        {% endif %}
+
         {# ---------------- Stats row ---------------- #}
         <div class="profile-stats">
             <div class="profile-stat">
@@ -71,7 +120,11 @@
                     </table>
                 </div>
                 {% else %}
+                {% if filters_active %}
+                <p class="profile-empty">No expenses match the current filters. Try widening the date range or clearing the category.</p>
+                {% else %}
                 <p class="profile-empty">No expenses yet — add one to see it here.</p>
+                {% endif %}
                 {% endif %}
             </div>
 
@@ -91,7 +144,11 @@
                     {% endfor %}
                 </div>
                 {% else %}
+                {% if filters_active %}
+                <p class="profile-empty">No categories match the current filters.</p>
+                {% else %}
                 <p class="profile-empty">No expenses yet — categories will appear here.</p>
+                {% endif %}
                 {% endif %}
             </div>
 
